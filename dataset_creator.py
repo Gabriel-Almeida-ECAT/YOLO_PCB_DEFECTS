@@ -52,7 +52,6 @@ def create_label(img_name: str, df: pd.DataFrame, dest_path: str) -> None:
 def main() -> None:
     annotations_dir = r'kaggle_pcb_dataset/Annotations'
     images_dir = r'kaggle_pcb_dataset/images'
-    class_names = ['missing_hole', 'mouse_bite', 'open_circuit', 'short', 'spur', 'spurious_copper']
 
     # Get source paths
     list_anotations_src_dirs = [os.path.join(annotations_dir, class_name) for class_name in os.listdir(annotations_dir)]
@@ -118,7 +117,7 @@ def main() -> None:
     print(tabulate(df_all.head(), headers='keys', tablefmt='psql'))
 
 
-    # CREATING TRAIN / TEST / VALID FOLDERS
+    # CREATING YOLO TRAIN / TEST / VALID FOLDERS
     train_images, val_images = train_test_split(all_img_files, test_size=0.3, random_state=9) # 70% train
     val_images, test_images = train_test_split(val_images, test_size=0.5, random_state=9) # 15% test / 15% validation
 
@@ -143,7 +142,7 @@ def main() -> None:
                 os.mkdir(ann_path)
 
     # Copie images from original dataset to the new yolo dataset
-    img_src_dict = {'train': train_images, 'test': test_images, 'valid': val_images}
+    img_src_dict = {'train': train_images, 'test': test_images, 'val': val_images}
     print_buffer = []
     for folder in folders[1:]:
         path = rf'yolo_pcb_dataset/{folder}/images'
