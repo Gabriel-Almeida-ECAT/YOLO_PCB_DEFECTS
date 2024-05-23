@@ -17,15 +17,15 @@ def extract_img_text(xml_path: str) -> list[dict]:
     tree = et.parse(xml_path)
     root = tree.getroot()
 
-    dict_info = {}
     list_dicts = []
-
-    dict_info['img_name'] = root.find('filename').text
-    dict_info['img_width'] = root.find('size').find('width').text
-    dict_info['img_height'] = root.find('size').find('height').text
 
     objects = root.findall('object')
     for ind, obj in enumerate(objects):
+        dict_info = {}
+
+        dict_info['img_name'] = root.find('filename').text
+        dict_info['img_width'] = root.find('size').find('width').text
+        dict_info['img_height'] = root.find('size').find('height').text
 
         bndbox = obj.find('bndbox')
         dict_info['obj_name'] = obj.find('name').text
@@ -45,6 +45,7 @@ def create_label(img_name: str, df: pd.DataFrame, dest_path: str) -> None:
 
     cols2save = ['img_name', 'class_id', 'center_x', 'center_y', 'box_width', 'box_height']
     groupby_obj = df[cols2save].groupby('img_name')
+    #print(tabulate(groupby_obj.get_group(img_name), headers='keys', tablefmt='psql'))
     groupby_obj.get_group(img_name).set_index('img_name').to_csv(text_file, sep=' ', index=False, header=False)
 
 
@@ -127,7 +128,7 @@ def main() -> None:
     print(f'# test size: {len(val_images)} - {len(val_images) / len(all_img_files):.2f}')
 
     # start creating YOLO_DATASET
-    folders = ['', 'train', 'test', 'valid']
+    folders = ['', 'train', 'test', 'val']
     for folder in folders:
         path = rf'yolo_pcb_dataset/{folder}'
         if not os.path.isdir(path):
@@ -140,10 +141,6 @@ def main() -> None:
                 os.mkdir(img_path)
             if not ann_path_exist:
                 os.mkdir(ann_path)
-
-    '''train_images_files = [file.split('/')[-1] for file in train_images]  # get only the image file name / remove path
-    test_images_files = [file.split('/')[-1] for file in test_images]  # get only the image file name / remove path
-    valid_images_files = [file.split('/')[-1] for file in val_images]  # get only the image file name / remove path'''
 
     # Copie images from original dataset to the new yolo dataset
     img_src_dict = {'train': train_images, 'test': test_images, 'valid': val_images}
